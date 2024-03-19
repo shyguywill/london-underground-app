@@ -1,81 +1,102 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Lines, Stop } from "./components";
+import styled from "styled-components";
+
+const AppWrapper = styled.div`
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-start;
+`;
+
+const StopsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+`;
+
+interface Station {
+  id: string;
+  name: string;
+}
 
 const App: React.FC = () => {
   const [lineStatus, setLineStatus] = useState<any[]>([]);
   const [selectedLine, setSelectedLine] = useState<string | null>(null);
-  const [lineStations, setLineStations] = useState<any>(null);
-  const [lineStops, setLineStops] = useState<any[]>([]);
+  const [lineStops, setLineStops] = useState<{ stations: Station[] } | null>(
+    null
+  );
+  const [stopDetails, setStopDetails] = useState<any>(null);
 
-  console.log({lineStatus, selectedLine, lineStations, lineStops})
+  console.log({ lineStatus, selectedLine, lineStops, stopDetails });
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_SERVER_URL}/api/lineStatus`)
-      .then(response => {
+    axios
+      .get(`${process.env.REACT_APP_SERVER_URL}/api/lineStatus`)
+      .then((response) => {
         setLineStatus(response.data);
       })
-      .catch(error => {
-        console.error('Error fetching line status:', error);
+      .catch((error) => {
+        console.error("Error fetching line status:", error);
       });
   }, []);
 
   const handleLineSelect = (lineId: string) => {
     setSelectedLine(lineId);
-    axios.get(`${process.env.REACT_APP_SERVER_URL}/api/lineStations/${lineId}`)
-      .then(response => {
-        console.log({ response })
-        setLineStations(response.data);
+    setStopDetails(null);
+    axios
+      .get(`${process.env.REACT_APP_SERVER_URL}/api/lineStations/${lineId}`)
+      .then((response) => {
+        console.log({ response });
+        setLineStops(response.data);
       })
-      .catch(error => {
-        console.error('Error fetching line branches:', error);
+      .catch((error) => {
+        console.error("Error fetching line branches:", error);
       });
   };
 
   const handleStationSelect = (stationId: string) => {
-    axios.get(`${process.env.REACT_APP_SERVER_URL}/api/stationDetails/${stationId}`)
-      .then(response => {
-        setLineStops(response.data);
+    setStopDetails(null);
+    axios
+      .get(
+        `${process.env.REACT_APP_SERVER_URL}/api/stationDetails/${stationId}`
+      )
+      .then((response) => {
+        setStopDetails(response.data);
       })
-      .catch(error => {
-        console.error('Error fetching line stops:', error);
+      .catch((error) => {
+        console.error("Error fetching line stops:", error);
       });
   };
 
   return (
-    <div>
+    <AppWrapper>
       <h1>London Underground</h1>
-      <h2>Line Statuses</h2>
-      <ul>
-        {lineStatus.map(line => (
-          <li key={line.id}>{line.name} - {line.lineStatuses[0].statusSeverityDescription}</li>
-        ))}
-      </ul>
 
-      <h2>Select a Line</h2>
-      <ul>
-        {lineStatus.map(line => (
-          <li key={line.id} onClick={() => handleLineSelect(line.id)}>{line.name}</li>
-        ))}
-      </ul>
+      <Lines
+        lines={lineStatus}
+        onSelectLine={(id) => handleLineSelect(id)}
+        selectedLine={selectedLine}
+      />
 
-      {selectedLine && lineStations && (
-        <div key={selectedLine}>
-          <h2>{selectedLine} Branches</h2>
-          <ul>
-            {lineStations.stations.map(station =>  (
-              <li key={station.id} onClick={() => handleStationSelect(station.id)}>{station.name}</li>
+      {selectedLine && lineStops && (
+        <div style={{ width: "100%" }}>
+          <StopsWrapper>
+            {lineStops.stations.map((station: Station) => (
+              <Stop
+                station={station}
+                onSelectStop={(id) => handleStationSelect(id)}
+                stopDetails={stopDetails}
+                key={station.id}
+              />
             ))}
-          </ul>
-
-          <h2>{selectedLine} Stops</h2>
-          <ul>
-            {lineStops.map(stop => (
-              <li key={stop.id}>{stop.name}</li>
-            ))}
-          </ul>
+          </StopsWrapper>
         </div>
       )}
-    </div>
+    </AppWrapper>
   );
 };
 

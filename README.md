@@ -10,6 +10,7 @@ This is a simple full-stack web application that provides information about Lond
 ## Technologies Used
 
 - Frontend:
+
   - React
   - TypeScript
 
@@ -80,7 +81,7 @@ npm start
 ## API Endpoints
 
 - `/api/lineStatus`: GET request to retrieve the status of London Underground lines.
-- `/api/lineStop/:lineId/:stopId`: GET request to retrieve details about a specific stop on a London Underground line.
+- `/api/stationDetails/:stopId`: GET request to retrieve details about a specific stop on a London Underground line.
 
 ## Contributing
 
