@@ -29,9 +29,6 @@ const App: React.FC = () => {
   const [lineStops, setLineStops] = useState<{ stations: Station[] } | null>(
     null
   );
-  const [stopDetails, setStopDetails] = useState<any>(null);
-
-  console.log({ lineStatus, selectedLine, lineStops, stopDetails });
 
   useEffect(() => {
     axios
@@ -46,29 +43,13 @@ const App: React.FC = () => {
 
   const handleLineSelect = (lineId: string) => {
     setSelectedLine(lineId);
-    setStopDetails(null);
     axios
       .get(`${process.env.REACT_APP_SERVER_URL}/api/lineStations/${lineId}`)
       .then((response) => {
-        console.log({ response });
         setLineStops(response.data);
       })
       .catch((error) => {
         console.error("Error fetching line branches:", error);
-      });
-  };
-
-  const handleStationSelect = (stationId: string) => {
-    setStopDetails(null);
-    axios
-      .get(
-        `${process.env.REACT_APP_SERVER_URL}/api/stationDetails/${stationId}`
-      )
-      .then((response) => {
-        setStopDetails(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching line stops:", error);
       });
   };
 
@@ -85,12 +66,11 @@ const App: React.FC = () => {
       {selectedLine && lineStops && (
         <div style={{ width: "100%" }}>
           <StopsWrapper>
-            {lineStops.stations.map((station: Station) => (
+            {lineStops.stations.map((station: Station, index) => (
               <Stop
-                station={station}
-                onSelectStop={(id) => handleStationSelect(id)}
-                stopDetails={stopDetails}
                 key={station.id}
+                isLast={index === lineStops.stations.length - 1}
+                station={station}
               />
             ))}
           </StopsWrapper>

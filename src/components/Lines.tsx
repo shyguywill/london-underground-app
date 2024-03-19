@@ -18,8 +18,9 @@ const ListWrapper = styled.div`
   flex-wrap: wrap;
 `;
 
-const ListItem = styled.div<{ isSelected: boolean }>`
-  background-color: ${({ isSelected }) => (isSelected ? "#2e9127" : "#113b92")};
+const ListItem = styled.div<{ $isSelected: boolean }>`
+  background-color: ${({ $isSelected }) =>
+    $isSelected ? "#2e9127" : "#113b92"};
   border-radius: 20px;
   padding: 5px 10px;
   margin: 5px;
@@ -53,7 +54,7 @@ const Status: React.FC<StatusProps> = ({
             <ListItem
               key={line.id}
               onClick={() => onSelectLine(line.id)}
-              isSelected={selectedLine === line.id}
+              $isSelected={selectedLine === line.id}
             >
               {line.name} -{" "}
               {line.lineStatuses.length > 0

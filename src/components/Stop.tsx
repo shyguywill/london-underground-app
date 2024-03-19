@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import styled from "styled-components";
 import StopInfo from "./StopInfo";
 
-const Station = styled.div`
+const Station = styled.div<{ $isLast: boolean }>`
   position: relative;
   cursor: pointer;
   display: flex;
   flex-direction: row;
   align-items: center;
 
-  &:not(:last-child)::before {
-    content: "";
-    position: relative;
-    width: 2px;
-    height: 20px;
-    background-color: blue;
-    left: 5px;
-    top: 10px;
-  }
+  ${({ $isLast }) =>
+    !$isLast &&
+    `
+    &:not(:last-child)::before {
+      content: "";
+      position: relative;
+      width: 2px;
+      height: 20px;
+      background-color: blue;
+      left: 5px;
+      top: 10px;
+    }
+  `}
 `;
 
 const ContentWrapper = styled.div`
@@ -79,28 +84,43 @@ interface StopDetails {
 
 interface StatusProps {
   station: Station;
-  onSelectStop: (id: string) => void;
-  stopDetails: StopDetails;
+  isLast: boolean;
 }
 
-const Stops: React.FC<StatusProps> = ({
-  station,
-  onSelectStop,
-  stopDetails,
-}) => {
+const Stops: React.FC<StatusProps> = ({ station, isLast }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [stopDetails, setStopDetails] = useState<StopDetails | null>(null);
+
+  const handleStationSelect = (stationId: string) => {
+    axios
+      .get(
+        `${process.env.REACT_APP_SERVER_URL}/api/stationDetails/${stationId}`
+      )
+      .then((response) => {
+        setStopDetails(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching line stops:", error);
+      });
+  };
 
   useEffect(() => {
     if (stopDetails?.id === station?.id) {
       setDropdownOpen(true);
-    } else {
-      setDropdownOpen(false);
     }
   }, [station, stopDetails]);
 
+  const selectStop = () => {
+    if (dropdownOpen) {
+      setDropdownOpen(false);
+    } else {
+      handleStationSelect(station.id);
+    }
+  };
+
   return (
-    <ContentWrapper key={station.id}>
-      <Station onClick={() => onSelectStop(station.id)}>
+    <ContentWrapper>
+      <Station onClick={selectStop} $isLast={isLast}>
         <Dot />
         <Text>{station.name}</Text>
         <Dropdown> Details</Dropdown>

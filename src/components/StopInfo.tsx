@@ -34,7 +34,7 @@ interface StopDetails {
 }
 
 interface StopInfoProps {
-  stopDetails: StopDetails;
+  stopDetails: StopDetails | null;
 }
 
 const StopInfo: React.FC<StopInfoProps> = ({ stopDetails }) => {
